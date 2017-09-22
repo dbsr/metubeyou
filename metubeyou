@@ -1,0 +1,41 @@
+#!/bin/sh
+
+function help() {
+  cat <<EOF
+Usage: $0 audio_file_path image_file_path output_fpath
+
+-h| --help           this is some help text.
+                     this is more help text.
+example:
+  ./metubeyou /Users/daan/Downloads/music.mp3 /Users/daan/Downloads/cover.jpg ~/Users/daan/Downloads/result
+EOF
+}
+
+# check dependencies
+if ! [ -x "$(command -v brew)" ]; then
+  echo 'Notice: brew is not installed.' >&2
+  echo 'Follow instructions to install missing dependency.'
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  echo 'Please rerun the script after installation is completed.'
+fi
+
+if ! [ -x "$(command -v ffmpeg)" ]; then
+  echo 'Notice: ffmpeg is not installed.' >&2
+  echo 'Follow instructions to install missing dependency.'
+  brew update && brew install -y ffmpeg
+fi
+
+if [ "$1" = "-h" ] || [ $# -lt 3 ]; then
+  help
+  exit 1
+fi
+
+
+# get input
+AUDIO_FPATH="$1"
+IMAGE_FPATH="$2"
+OUTPUT_FPATH="$3.mkv"
+
+ffmpeg -loop 1 -r ntsc -i $IMAGE_FPATH -i "$AUDIO_FPATH" -c:a copy -c:v libx264 -preset fast -threads 0 -shortest "${OUTPUT_FPATH}" && 
+ \ echo "Transcode succesfull: $OUTPUT_FPATH"
+
